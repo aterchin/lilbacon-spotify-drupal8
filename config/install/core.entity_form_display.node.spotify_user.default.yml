@@ -1,0 +1,45 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.field.node.spotify_user.field_spotify_display_name
+    - field.field.node.spotify_user.field_spotify_playlist_id
+    - node.type.spotify_user
+  module:
+    - path
+id: node.spotify_user.default
+targetEntityType: node
+bundle: spotify_user
+mode: default
+content:
+  field_spotify_display_name:
+    weight: 1
+    settings:
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+    type: string_textfield
+  field_spotify_playlist_id:
+    weight: 2
+    settings:
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+    type: string_textfield
+  path:
+    type: path
+    weight: 3
+    settings: {  }
+    third_party_settings: {  }
+  title:
+    type: string_textfield
+    weight: 0
+    settings:
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+hidden:
+  created: true
+  promote: true
+  sticky: true
+  uid: true

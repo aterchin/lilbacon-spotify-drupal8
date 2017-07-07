@@ -1,0 +1,38 @@
+lilbacon_spotify.admin.config:
+  path: '/admin/config/services/lilbacon-spotify'
+  defaults:
+    _form: 'Drupal\lilbacon_spotify\Form\SpotifySettingsForm'
+    _title: 'Lilbacon Spotify settings'
+  requirements:
+    _permission: 'administer lilbacon_spotify'
+
+lilbacon_spotify.overview:
+  path: '/spotify'
+  defaults:
+    _controller: 'Drupal\lilbacon_spotify\Controller\LilbaconSpotifyController::overview'
+    _title: 'Spotify'
+  requirements:
+    _permission: 'access content'
+  options:
+    no_cache: TRUE
+
+lilbacon_spotify.callback:
+  path: '/spotify-callback'
+  defaults:
+    _controller: 'Drupal\lilbacon_spotify\Controller\LilbaconSpotifyController::callback'
+    _title: 'Callback'
+  requirements:
+    _permission: 'access content'
+  options:
+    no_cache: TRUE
+
+lilbacon_spotify.users.id:
+  path: '/spotify/users/{user_id}'
+  defaults:
+    _controller: 'Drupal\lilbacon_spotify\Controller\LilbaconSpotifyController::usersPage'
+    _title: 'Spotify User'
+  requirements:
+    _permission: 'access content'
+  options:
+    no_cache: TRUE
+  

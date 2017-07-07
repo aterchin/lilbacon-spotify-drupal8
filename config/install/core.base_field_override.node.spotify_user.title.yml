@@ -1,0 +1,17 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - node.type.spotify_user
+id: node.spotify_user.title
+field_name: title
+entity_type: node
+bundle: spotify_user
+label: Username
+description: ''
+required: true
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: string

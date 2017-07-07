@@ -1,0 +1,53 @@
+<?php
+/**
+ * @file
+ */
+use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\lilbacon_spotify\Utility\LilbaconSpotifyUtility;
+
+/**
+ *  Implements hook_theme().
+ */
+function lilbacon_spotify_theme($existing, $type, $theme, $path) {
+  return [
+      'lilbacon_spotify_overview' => [
+          'variables' => [
+              'profiles' => [],
+          ]
+      ],
+      'lilbacon_spotify_user' => [
+          'variables' => [
+              'profiles' => [],
+              'playlists' => [],
+          ]
+      ]
+  ];
+}
+
+/**
+ * Implements hook_form_alter().
+ */
+function lilbacon_spotify_form_alter(&$form, FormStateInterface $form_state, $form_id) {
+  switch ($form_id) {
+    case 'node_spotify_user_form':
+    case 'node_spotify_user_edit_form':
+      $form['#validate'][] = 'lilbacon_spotify_user_validate';
+      break;
+  }
+}
+
+/**
+ * Custom validation handler for Spotify User node forms.
+ */
+function lilbacon_spotify_user_validate(array &$form, FormStateInterface $form_state) {
+  $title = $form_state->getValue('title');
+  if (!is_null($title)) {
+    // check if this username exists
+    $util = new LilbaconSpotifyUtility();
+    $profile = $util->getSpotifyPublicProfile($title[0]['value']);
+    if (!$profile) {
+      $form_state->setErrorByName('title', 'This profile does not exist in the Spotify database or is not public.');
+    }
+  }
+}

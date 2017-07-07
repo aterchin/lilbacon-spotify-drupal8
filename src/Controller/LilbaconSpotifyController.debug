@@ -1,0 +1,251 @@
+<?php
+
+/**
+ * @file
+ * Contains \Drupal\lilbacon_spotify\Controller\LilbaconSpotifyController
+ *
+ * @author Adam Terchin <adam.terchin@gmail.com>
+ *
+ */
+
+namespace Drupal\lilbacon_spotify\Controller;
+
+use Drupal\Core\Controller\ControllerBase;
+use Symfony\Component\DependencyInjection\ContainerInterface;
+use Drupal\Core\Session\AccountInterface;
+use Drupal\Core\Session\SessionManager;
+use Drupal\user\PrivateTempStoreFactory;
+
+use Drupal\Component\Utility\Html;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\RedirectResponse;
+use Drupal\Core\Routing\TrustedRedirectResponse;
+
+use Drupal\lilbacon_spotify\SpotifySession;
+use Drupal\lilbacon_spotify\SpotifyWebAPI;
+
+class LilbaconSpotifyController extends ControllerBase {
+
+  /**
+   * Drupal\user\PrivateTempStoreFactory definition.
+   *
+   * @var Drupal\user\PrivateTempStoreFactory
+   */
+  protected $tempStoreFactory;
+
+  /**
+   * Drupal\Core\Session\SessionManager definition.
+   *
+   * @var Drupal\Core\Session\SessionManager
+   */
+  protected $sessionManager;
+
+  /**
+   * Drupal\Core\Session\AccountInterface definition.
+   *
+   * @var Drupal\Core\Session\AccountInterface
+   */
+  protected $currentUser;
+
+  /**
+   * Spotify API requirements
+   */
+  protected $client_id;
+  protected $client_secret;
+  protected $callback_url;
+
+  /**
+   * {@inheritdoc}
+   */
+  public function __construct(
+      PrivateTempStoreFactory $temp_store_factory,
+      SessionManager $session_manager,
+      AccountInterface $current_user) {
+
+    global $base_url;
+
+    $this->sessionManager = $session_manager;
+    $this->currentUser = $current_user;
+    $this->tempStoreFactory = $temp_store_factory;
+    $this->store = $this->tempStoreFactory->get('lilbacon_spotify');
+
+    $this->client_id = '510cfa45d2e548c0a2c66b073a1c6d15';
+    $this->client_secret = '87f0b9ecc2f64292bd7b66230a9afda0';
+    $this->callback_url = $base_url . '/spotify-callback';
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container) {
+    return new static(
+      $container->get('user.private_tempstore'),
+      $container->get('session_manager'),
+      $container->get('current_user')
+    );
+  }
+
+  // Starts session for anonymous users (so the session is not
+  // initialized at every request for them)
+  // drupal.stackexchange.com/questions/197576/storing-data-session-for-anonymous-user/200168
+  public function setFingerprint() {
+    if ($this->currentUser->isAnonymous() && !isset($_SESSION['session_started'])) {
+      $this->sessionManager->regenerate();
+      $_SESSION['session_started'] = TRUE;
+    }
+  }
+
+  public function api() {
+    $this->setFingerprint();
+    $tokens = $this->store->get('tokens'); //@debug
+
+    if ($tokens !== NULL) {
+      print '<pre>1. api function: tokens aint null</pre>';
+      var_dump($tokens);
+    }
+    $this->register();
+    $tokens = $this->store->get('tokens'); //@debug
+    if ($tokens !== NULL) {
+      print '<pre>3. api function: modifed tokens</pre>';
+      var_dump($tokens);
+      //return new Response('tokens are not null: ' . $tokens);
+    }
+    //$api = new SpotifyWebAPI();
+    //$api->setAccessToken($token);
+
+    return $api;
+  }
+
+  public function register() {
+//    $session = new SpotifySession($this->client_id, $this->client_secret, $this->callback_url);
+//    $tokens = $this->userPrivateTempstore->get('tokens');
+    
+//    $authorized = FALSE;
+    
+    $tokens = $this->store->get('loki');
+    print '<pre>2. register function.  these tokens?</pre>';
+    var_dump($tokens);
+
+    if ($tokens !== NULL && !empty($tokens)) {
+      $tokens['t1'] = 'string7';
+      $tokens['t2'] = 'string8';
+      $this->store->set('loki', $tokens);
+    }
+    else {
+      $response = new RedirectResponse('/spotify-callback');
+      $response->send(); 
+      //return new Response($tokens);
+    }
+
+
+//    if ($tokens !== NULL && isset($tokens['access_token'])) {
+//      if ($tokens['expiration'] < time()) {
+//        if ($tokens['refresh_token'] !== '') {
+//          if ($session->refreshAccessToken($tokens['refresh_token'])) {
+//            $tokens['access_token'] = $session->getAccessToken();
+//            $tokens['expiration'] = $session->getTokenExpiration();
+//            $this->userPrivateTempstore->set('tokens', $tokens);
+//            $authorized = TRUE;
+//          }
+//        }
+//      }
+//      else {
+//        //under an hour, still authorized
+//        $authorized = TRUE;
+//      }
+//    }
+//
+//    if ($authorized === FALSE) {
+//      $scopes = [
+//        'scope' => [
+//            'playlist-read-private',
+//            'user-read-private',
+//            'playlist-modify-private',
+//            'playlist-modify-public',
+//            'playlist-read-private'
+//        ]
+//      ];
+//
+//      $url = $session->getAuthorizeUrl($scopes);
+//      if ($url) {
+//        $response = new TrustedRedirectResponse($url);
+//        $response->send();
+//      }
+//    }
+  }
+
+  public function callback() {
+//    $session = new SpotifySession($this->client_id, $this->client_secret, $this->callback_url);
+//
+//    $code = '';
+//    $request = Request::createFromGlobals();
+//    if ($request->headers->has('code')) {
+//      $code = Html::escape($request->headers->get('code'));
+//    }
+//    elseif ($request->query->has('code')) {
+//      $code = Html::escape($request->query->get('code'));
+//    }
+//    if (!empty($code)) {
+//      $session->requestAccessToken($code);
+//      $tokens = [
+//          'access_token' => $session->getAccessToken(),
+//          'expiration' => $session->getTokenExpiration(),
+//          'refresh_token' => $session->getRefreshToken()
+//      ];
+//      $this->userPrivateTempstore->set('tokens', $tokens);
+//
+//      return new RedirectResponse('/spotify');
+//    }
+
+    $this->store->set('loki', ['t1' => 'string1', 't2' => 'string2']);
+    //return new Response('end of spotify callback');
+
+    return new RedirectResponse('/spotify'); //@debug
+
+    //return new Response('You need to get an authorization URL. Visit /spotify.');
+  }
+
+  public static $users = [
+      'aterchin',
+//      '121121841',
+//      'mkhaidet',
+//      'bbakshis',
+//      'stpchris',
+//      'liazac',
+  ];
+
+  public function overview() {
+    $api = $this->api();
+    return new Response('overview method.  debugging....');
+    foreach (self::$users as $userId) {
+      $user_playlists = $api->getUserPlaylists($userId);
+      dpm($user_playlists);
+      //$api->addUserPlaylistTracks($userId, '5vOfWHgbKONrSyV5LPSPQW', ['6RyYsHboLstYl0MDhv8F6R']);
+      $user_playlists = $api->getUserPlaylists($user);
+      if (!empty($user_playlists)) {
+        foreach ($user_playlists->items as $playlist) {
+          if ($playlist->name === 'SBXJAN2017-ALL') {
+            $tracks = $api->getUserPlaylistTracks($user, $playlist->id);
+            if (!empty($tracks)){
+              foreach ($tracks->items as $track) {
+                $user_tracks[$user][] = $track->track->id;
+              }
+            }
+          }
+        }
+      }
+    }
+
+    return [
+      '#theme' => 'lilbacon_spotify_overview',
+      '#user' => $api->me(),
+      '#attached' => [
+        'library' =>  [
+          'lilbacon_spotify/spotify'
+        ]
+      ]
+    ];
+  }
+
+}

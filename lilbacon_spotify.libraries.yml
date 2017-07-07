@@ -1,0 +1,8 @@
+spotify:
+  js:
+    js/spotify.js: {}
+  dependencies:
+    - core/jquery
+  css:
+    theme:
+      css/spotify.css: {}

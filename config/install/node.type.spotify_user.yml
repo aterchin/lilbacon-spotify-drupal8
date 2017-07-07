@@ -1,0 +1,10 @@
+langcode: en
+status: true
+dependencies:
+name: 'Spotify User'
+type: spotify_user
+description: 'Container for a Spotify user.'
+help: ''
+new_revision: true
+preview_mode: 0
+display_submitted: false

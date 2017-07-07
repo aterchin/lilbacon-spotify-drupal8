@@ -1,0 +1,4 @@
+administer lilbacon_spotify:
+  title: 'Administer Lilbacon Spotify'
+  description: 'Administer Spotify authorization settings and user ids.'
+  restrict access: TRUE

@@ -1,0 +1,5 @@
+name: Lilbacon Spotify
+type: module
+description: 'Allows integration with the Spotify streaming music service.'
+package: Custom
+core: 8.x
