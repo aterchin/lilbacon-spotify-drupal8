@@ -1,5 +1,5 @@
 <?php
-  
+
 /**
  * @file
  * Contains Drupal\lilbacon_spotify\Utility\LilbaconSpotifyUtility
@@ -10,8 +10,9 @@
 
 namespace Drupal\lilbacon_spotify\Utility;
 
-use GuzzleHttp\Client;
-use GuzzleHttp\Exception\RequestException;
+use Drupal\lilbacon_spotify\SpotifySession;
+use Drupal\lilbacon_spotify\SpotifyWebAPI;
+use Drupal\lilbacon_spotify\SpotifyWebAPIException;
 
 class LilbaconSpotifyUtility {
 
@@ -20,22 +21,19 @@ class LilbaconSpotifyUtility {
    *
    * @param $userId string
    *
-   * @return obj|FALSE
+   * @return object|FALSE
    */
   public function getSpotifyPublicProfile($userId) {
     $profile = FALSE;
+    $session = $this->createSession();
+    $session->requestCredentialsToken();
 
-    $client = new Client(['base_uri' => \Drupal\lilbacon_spotify\SpotifyRequest::API_URL]);
+    $webapi = new SpotifyWebAPI();
+    $webapi->setAccessToken($session->getAccessToken());
     try {
-      $response = $client->get('/v1/users/' . $userId, [
-          'headers' => [
-              'Accept' => 'application/json'
-          ]
-      ]);
-      $data = $response->getBody();
-      $profile = json_decode($data);
+      $profile = $webapi->getUser($userId);
     }
-    catch (RequestException $ex) {
+    catch (SpotifyWebAPIException $ex) {
       //$response = $ex->getResponse();
       //echo $response->getStatusCode(); // 404
       //echo $response->getReasonPhrase(); // "Not Found"
@@ -45,4 +43,46 @@ class LilbaconSpotifyUtility {
     return $profile;
   }
 
+  /**
+   * Gets Album information from Spotify
+   *
+   * @param $albumId
+   *
+   * @return object|FALSE
+   */
+  public function getSpotifyAlbum($albumId) {
+    $album = FALSE;
+
+    $session = $this->createSession();
+    $session->requestCredentialsToken();
+
+    $webapi = new SpotifyWebAPI();
+    $webapi->setAccessToken($session->getAccessToken());
+    $webapi->getAlbum($albumId);
+
+    $response = $webapi->getLastResponse();
+
+    if($response['status'] == 200) {
+      $album = $response['body'];
+    }
+
+    return $album;
+  }
+
+  /**
+   * Creates a Spotify session, using parameters from the module's form
+   *
+   * @return \Drupal\lilbacon_spotify\SpotifySession
+   */
+  public function createSession() {
+    $auth_config = \Drupal::config('lilbacon_spotify.auth');
+
+    $session = new SpotifySession(
+      $auth_config->get('client_id'),
+      $auth_config->get('client_secret'),
+      $auth_config->get('callback_url')
+    );
+
+    return $session;
+  }
 }
