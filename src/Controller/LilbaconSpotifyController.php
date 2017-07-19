@@ -146,11 +146,10 @@ class LilbaconSpotifyController extends ControllerBase {
       // url is /spotify/user/[userID] or something we will need
       // to redirect to after authorization URL sends to callback
       $route = \Drupal::routeMatch()->getRouteName();
-      if ($route !== 'lilbacon_spotify.overview') {
+      if ($route !== 'lilbacon_spotify.overview' || $route !== 'lilbacon_spotify.unregister') {
         $this->store->set('destination', \Drupal::request()->getRequestUri());
       }
-      // spotify-related stuff
-      $scopes = [
+      $params = [
         'scope' => [
             'playlist-read-private',
             'user-read-private',
@@ -160,12 +159,18 @@ class LilbaconSpotifyController extends ControllerBase {
             'playlist-read-private'
         ]
       ];
-      $url = $session->getAuthorizeUrl($scopes);
+      $url = $session->getAuthorizeUrl($params);
       if ($url) {
         $response = new TrustedRedirectResponse($url);
         $response->send();
       }
     }
+  }
+
+  public function unregister() {
+    $this->store->set('tokens', NULL);
+    $response = new RedirectResponse('http://www.spotify.com/logout');
+    $response->send();
   }
 
   public function callback() {
@@ -194,7 +199,7 @@ class LilbaconSpotifyController extends ControllerBase {
       return new RedirectResponse($destination);
     }
 
-    return new Response('You were not redirected from the authorization URL. Visit /spotify.');
+    return new Response('You were not redirected from the authorization URL. Visit <a href="/spotify">/spotify</a>.');
   }
 
   public function overview() {

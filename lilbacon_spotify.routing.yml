@@ -35,4 +35,13 @@ lilbacon_spotify.users.id:
     _permission: 'access content'
   options:
     no_cache: TRUE
-  
+
+lilbacon_spotify.unregister:
+  path: '/spotify/unregister'
+  defaults:
+    _controller: 'Drupal\lilbacon_spotify\Controller\LilbaconSpotifyController::unregister'
+    _title: 'Unregister Spotify'
+  requirements:
+    _permission: 'access content'
+  options:
+    no_cache: TRUE
